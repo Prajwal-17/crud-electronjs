@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { setUpIpcHandlers } from './ipcHandlers';
 
 let mainWindow: BrowserWindow;
 
@@ -34,6 +35,7 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('demo'); // windows specific, a unique identifier for windows
+  setUpIpcHandlers()
 
   // Enable F12, disable Cmd/Ctrl+R in production
   app.on('browser-window-created', (_, window) => {

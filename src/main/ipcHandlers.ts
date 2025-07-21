@@ -3,7 +3,7 @@ import { addTodo, deleteTodo, getAllTodos, udpateTodo } from "./db";
 
 export function setUpIpcHandlers() {
 
-  ipcMain.handle("getAllTodos", () => {
+  ipcMain.handle("getAllTodos", (_event) => {
     const todos = getAllTodos()
     return todos
   })

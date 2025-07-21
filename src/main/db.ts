@@ -18,7 +18,7 @@ export function addTodo(newTodo: string) {
 
 export function getAllTodos() {
   const query = db.prepare('SELECT * FROM todos')
-  const todos = query.run(query)
+  const todos = query.all();
   return todos
 }
 

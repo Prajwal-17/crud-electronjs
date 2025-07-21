@@ -1,15 +1,65 @@
+import { Check, PencilLine, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+type TodoType = {
+  id: number;
+  todo: string;
+};
+
 const App = () => {
-  useEffect(() => {
-    console.log("window", window);
-    console.log("window electron", window.electron);
-    console.log("window api", window.api);
-  }, [window]);
-
+  const [allTodos, setAllTodos] = useState<TodoType[]>([]);
   const [todo, setTodo] = useState("");
+  const [isUpdating, setIsUpdating] = useState<number | null>();
+  const [editInput, setEditInput] = useState("");
 
-  function handleAddTodo() {}
+  useEffect(() => {
+    async function fetchAllTodos() {
+      try {
+        const response = await window.todoApi.getAllTodos();
+        console.log(response);
+        setAllTodos(response);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    fetchAllTodos();
+  }, []);
+
+  async function handleAddTodo() {
+    try {
+      const response = await window.todoApi.addTodo(todo);
+      console.log(response);
+      if (response) {
+        setTodo("");
+        const response = await window.todoApi.getAllTodos();
+        setAllTodos(response);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleDeleteTodo(id: number) {
+    try {
+      const response = await window.todoApi.deleteTodo(id);
+      const getAllTodos = await window.todoApi.getAllTodos();
+      setAllTodos(getAllTodos);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleUpdateTodo(id: number) {
+    try {
+      const response = await window.todoApi.udpateTodo(id, editInput);
+      const getAllTodos = await window.todoApi.getAllTodos();
+      setAllTodos(getAllTodos);
+      setIsUpdating(null);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <>
@@ -35,7 +85,45 @@ const App = () => {
             </button>
           </div>
           <div className="w-full text-center text-lg font-medium">
+            <div></div>
             All Todos:
+          </div>
+          <div>
+            {allTodos.length > 0 &&
+              allTodos.map((todo) => (
+                <div key={todo.id} className="flex justify-between gap-2">
+                  <div className="flex">
+                    <div className="font-bold">{todo.id}.</div>
+                    {isUpdating === todo.id ? (
+                      <input
+                        type="text"
+                        value={editInput}
+                        onChange={(e) => setEditInput(e.target.value)}
+                        className="border-2 px-2 py-2 rounded-lg w-full"
+                      />
+                    ) : (
+                      <div>{todo.todo}</div>
+                    )}
+                  </div>
+                  <div className="space-x-2">
+                    <button
+                      onClick={
+                        isUpdating
+                          ? () => handleUpdateTodo(todo.id)
+                          : () => {
+                              setEditInput(todo.todo);
+                              setIsUpdating(todo.id);
+                            }
+                      }
+                    >
+                      {isUpdating === todo.id ? <Check /> : <PencilLine />}
+                    </button>
+                    <button onClick={() => handleDeleteTodo(todo.id)}>
+                      <Trash2 />
+                    </button>
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
       </div>
